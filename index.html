@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculadora de Devuelta en Pesos Colombianos</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <style>
+      /* Tus estilos CSS aquí */
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 class="text-center mb-4">
+        Calculadora de Devuelta en Pesos Colombianos
+      </h2>
+      <div class="form-group">
+        <label for="pago">Cantidad pagada con billete de ? </label>
+        <input
+          type="number"
+          id="pago"
+          class="form-control"
+          placeholder="Ingrese la cantidad pagada"
+        />
+      </div>
+      <div class="form-group">
+        <label for="total">Total de la compra (COP):</label>
+        <input
+          type="number"
+          id="total"
+          class="form-control"
+          placeholder="Ingrese el total"
+        />
+      </div>
+      <button
+        onclick="calcularDevuelta()"
+        class="btn btn-primary btn-block btn-calculadora"
+      >
+        Calcular Devuelta
+      </button>
+      <div id="resultado" style="display: none" class="mt-4">
+        <h3>Devuelta:</h3>
+        <p id="devuelta"></p>
+      </div>
+
+      <button onclick="generarExcel()" class="btn btn-success btn-block">
+        Generar Excel
+      </button>
+      <button onclick="generarPDF()" class="btn btn-danger btn-block">
+        Generar PDF
+      </button>
+    </div>
+
+    <script>
+      var datosRegistrados = [];
+
+      function calcularDevuelta() {
+        var total = parseFloat(document.getElementById("total").value);
+        var pago = parseFloat(document.getElementById("pago").value);
+
+        if (isNaN(total) || isNaN(pago)) {
+          alert("Por favor ingrese números válidos.");
+          return;
+        }
+
+        var devuelta = pago - total;
+
+        if (devuelta < 0) {
+          alert("La cantidad pagada es insuficiente.");
+          return;
+        }
+
+        document.getElementById("devuelta").innerText =
+          "Devuelta: " + devuelta.toFixed(3) + " COP";
+        document.getElementById("resultado").style.display = "block";
+
+        // Almacenar datos registrados
+        datosRegistrados.push({
+          pago: pago.toFixed(3),
+          total: total.toFixed(3),
+          devuelta: devuelta.toFixed(3),
+        });
+      }
+
+      function generarExcel() {
+        if (datosRegistrados.length === 0) {
+          alert("No hay datos registrados para generar el archivo Excel.");
+          return;
+        }
+
+        var data = datosRegistrados.map(function (item) {
+          return [
+            item.pago + " COP",
+            item.total + " COP",
+            item.devuelta + " COP",
+          ];
+        });
+
+        var ws = XLSX.utils.aoa_to_sheet(
+          [["Cantidad Pagada", "Total de la Compra", "Devuelta"]].concat(data)
+        );
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Devueltas");
+
+        XLSX.writeFile(wb, "devueltas.xlsx");
+      }
+
+      function generarPDF() {
+        if (datosRegistrados.length === 0) {
+          alert("No hay datos registrados para generar el archivo PDF.");
+          return;
+        }
+
+        var pdf = new jsPDF();
+
+        pdf.text("Registro de Devueltas en Pesos Colombianos", 10, 10);
+
+        var posY = 20;
+        datosRegistrados.forEach(function (item) {
+          pdf.text("Cantidad Pagada: " + item.pago + " COP", 10, posY);
+          pdf.text("Total de la Compra: " + item.total + " COP", 10, posY + 10);
+          pdf.text("Devuelta: " + item.devuelta + " COP", 10, posY + 20);
+          posY += 40;
+        });
+
+        pdf.save("devueltas.pdf");
+      }
+    </script>
+  </body>
+</html>
