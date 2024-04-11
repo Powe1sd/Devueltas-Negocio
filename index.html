@@ -12,6 +12,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <style>
       /* Tus estilos CSS aquí */
+      #totalCompras {
+        color: red;
+      }
     </style>
   </head>
   <body>
@@ -47,6 +50,7 @@
         <h3>Devuelta:</h3>
         <p id="devuelta"></p>
       </div>
+      <p id="totalCompras" style="color: red"></p>
 
       <button onclick="generarExcel()" class="btn btn-success btn-block">
         Generar Excel
@@ -89,6 +93,10 @@
 
         // Calcular total de compras
         totalCompras += total;
+
+        // Actualizar total de compras en la interfaz de usuario
+        document.getElementById("totalCompras").innerText =
+          "Total de Compras: " + totalCompras.toFixed(3) + " COP";
       }
 
       function generarExcel() {
@@ -106,10 +114,18 @@
         });
 
         // Agregar fila con la suma de los totales
-        data.push(["", "Total de Compras:", totalCompras.toFixed(3) + " COP"]);
+        data.push(["", "", "", "", totalCompras.toFixed(3) + " COP"]);
 
         var ws = XLSX.utils.aoa_to_sheet(
-          [["Cantidad Pagada", "Total de la Compra", "Devuelta"]].concat(data)
+          [
+            [
+              "Cantidad Pagada",
+              "Total de la Compra",
+              "Devuelta",
+              "",
+              "Total de Compras",
+            ],
+          ].concat(data)
         );
         var wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Devueltas");
